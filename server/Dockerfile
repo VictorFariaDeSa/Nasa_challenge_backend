@@ -7,7 +7,11 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     tini \
     bash \
+    git \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install ipykernel
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \

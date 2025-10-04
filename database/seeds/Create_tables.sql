@@ -23,6 +23,13 @@ CREATE TABLE IF NOT EXISTS authors (
     name VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS mentions (
+    topic_id INT,
+    mention_date DATE,
+    mention_counter INT,
+    PRIMARY KEY (topic_id, mention_date)
+);
+
 CREATE TABLE IF NOT EXISTS topic_category (
     topic_id INT NOT NULL,
     category_id INT NOT NULL,
