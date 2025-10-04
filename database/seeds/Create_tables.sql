@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS placeholder (
+    id SERIAL PRIMARY KEY
+);
