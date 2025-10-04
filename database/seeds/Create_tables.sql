@@ -24,10 +24,12 @@ CREATE TABLE IF NOT EXISTS authors (
 );
 
 CREATE TABLE IF NOT EXISTS mentions (
-    id SERIAL PRIMARY KEY,
+    topic_id SERIAL,
     mention_date DATE,
-    mention_counter INT
+    mention_counter INT,
+    PRIMARY KEY (topic_id, mention_date)
 );
+
 
 CREATE TABLE IF NOT EXISTS topic_category (
     topic_id INT NOT NULL,
