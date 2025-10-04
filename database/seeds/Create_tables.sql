@@ -1,18 +1,18 @@
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50),
+    name VARCHAR(50) NOT NULL,
     summary TEXT
 );
 
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50), 
+    name VARCHAR(50) NOT NULL, 
     summary TEXT
 );
 
 CREATE TABLE IF NOT EXISTS articles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50), 
+    name VARCHAR(50) NOT NULL, 
     summary TEXT,
     link VARCHAR(100),
     publish_date DATE
@@ -20,5 +20,13 @@ CREATE TABLE IF NOT EXISTS articles (
 
 CREATE TABLE IF NOT EXISTS authors (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50), 
+    name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS topic_category (
+    topic_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (topic_id, category_id),
+    FOREIGN KEY (topic_id) REFERENCES topics (id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
 );
