@@ -17,3 +17,8 @@ CREATE TABLE IF NOT EXISTS articles (
     link VARCHAR(100),
     publish_date DATE
 );
+
+CREATE TABLE IF NOT EXISTS authors (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50), 
+);
