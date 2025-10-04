@@ -30,3 +30,11 @@ CREATE TABLE IF NOT EXISTS topic_category (
     FOREIGN KEY (topic_id) REFERENCES topics (id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS article_author (
+    article_id INT NOT NULL,
+    author_id INT NOT NULL,
+    PRIMARY KEY (article_id, author_id),
+    FOREIGN KEY (article_id) REFERENCES articles (id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES authors (id) ON DELETE CASCADE
+);
