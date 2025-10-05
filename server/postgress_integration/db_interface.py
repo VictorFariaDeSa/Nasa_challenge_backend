@@ -8,6 +8,7 @@ DATABASE_HOST = os.environ.get("DATABASE_HOST")
 DATABASE_PORT = os.environ.get("DATABASE_PORT")
 DATABASE_NAME = os.environ.get("DATABASE_NAME")
 
+
 def create_postgres_engine(user, password, host, port, db_name, async_mode=True):
     driver = "asyncpg" if async_mode else "psycopg2"
     database_url = f"postgresql+{driver}://{user}:{password}@{host}:{port}/{db_name}"
@@ -19,10 +20,6 @@ def create_postgres_engine(user, password, host, port, db_name, async_mode=True)
     return engine, metadata, database
 
 
-engine, metadata,database = create_postgres_engine(
-    DATABASE_USER,
-    DATABASE_PASSWORD,
-    DATABASE_HOST,
-    DATABASE_PORT,
-    DATABASE_NAME
+engine, metadata, database = create_postgres_engine(
+    DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT, DATABASE_NAME
 )

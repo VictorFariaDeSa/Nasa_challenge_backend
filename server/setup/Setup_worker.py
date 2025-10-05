@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from Webscrapper import Webscrapper
+from setup.Webscrapper import Webscrapper
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
