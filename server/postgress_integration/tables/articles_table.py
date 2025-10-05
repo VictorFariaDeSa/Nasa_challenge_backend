@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Text, MetaData, Date
+from sqlalchemy import Table, Column, Integer, String, Text, MetaData, Date, select
 from pydantic import BaseModel
 from postgress_integration.TrendingOrbit_table import TrendingOrbit_table
 from datetime import date
@@ -30,10 +30,27 @@ class TO_articles_table(TrendingOrbit_table):
         return self.row(name=name,summary=summary,link=link,publish_date=publish_date)
 
     async def Insert_article(self,new_row: ArticleRow):
-        query = self.table.insert().values(name=new_row.name, summary=new_row.summary)
+        query = self.table.insert().values(
+            name=new_row.name, 
+            summary=new_row.summary,
+            link=new_row.link,
+            publish_date= new_row.publish_date)
         last_record_id = await self.database.execute(query)
         return {"id": last_record_id}
+    
+    async def Get_id_by_link(self, link: str):
+        query = select(self.table.c.id).where(self.table.c.link == link)
+        result = await self.database.fetch_one(query)
+        if result:
+            return result["id"]
+        return None
 
+    async def Get_name_by_id(self,id):
+        query = select(self.table.c.name).where(self.table.c.id == id)
+        result = await self.database.fetch_one(query)
+        if result:
+            return result["name"]
+        return None
 
 
 articles_table = TO_articles_table()

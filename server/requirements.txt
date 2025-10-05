@@ -21,3 +21,11 @@ pandas
 scikit-learn
 gensim
 numpy==1.24.4
+
+chromadb
+sentence-transformers
+pdfplumber
+
+beautifulsoup4 
+lxml
+nltk
