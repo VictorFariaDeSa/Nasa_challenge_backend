@@ -1,35 +1,46 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Webscrapper import Webscrapper
-
+import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
-# Mantenha a importação da classe Webscrapper, mas ela deve ser alterada acima!
-# from Webscrapper import Webscrapper 
 
 class Setup_worker():
     # ... __init__ ...
 
-    def Get_all_data(self, url_list):
-        webscrapper = Webscrapper() 
-        
-        all_data = {'authors': {}, 'publish_date': {}, 'abstracts': {}}
+    def Get_all_data(self, df):
+        webscrapper = Webscrapper()
+        url_list = df['Link'].to_list()
+        print(url_list)
+        all_data = {
+            'authors': {},
+            'publish_date': {},
+            'abstracts': {}
+        }
 
         def fetch_all_data(i, url):
-            data = webscrapper.Get_all_data_from_url(url)
-            return i, data
+            try:
+                data = webscrapper.Get_all_data_from_url(url)
+                return i, data
+            except Exception as e:
+                print(f"Error ao processsing URL (index {i}): {url}\n{e}")
+                return i, {'authors': None, 'publish_date': None, 'abstracts': None}
 
         with ThreadPoolExecutor(max_workers=40) as executor:
             futures = {executor.submit(fetch_all_data, i, url): i for i, url in enumerate(url_list)}
-            
-            # Processa os resultados
+
             for future in as_completed(futures):
                 i, data = future.result()
-                
-                # Distribui os dados coletados em seus respectivos dicionários
-                all_data['authors'][i] = data['authors']
-                all_data['publish_date'][i] = data['publish_date']
-                all_data['abstracts'][i] = data['abstract']
 
-        return all_data
+                all_data['authors'][i] = data.get('authors', None)
+                all_data['publish_date'][i] = data.get('publish_date', None)
+                all_data['abstracts'][i] = data.get('abstract', None)
+
+        
+
+        df['authors'] = pd.Series(all_data['authors'])
+        df['publish_date'] = pd.Series(all_data['publish_date'])
+        df['abstracts'] = pd.Series(all_data['abstracts'])
+
+        return all_data, df
 
     def Format_topics_articles_dict(self,related_articles,articles_name):
         new_dict = {}

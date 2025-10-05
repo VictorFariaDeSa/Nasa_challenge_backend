@@ -1,5 +1,5 @@
 import pandas as pd
-from postgress_integration.tables import authors_table, articles_table, article_author_table, topics_table, topic_article_table, categories_table, topic_category_table
+from postgress_integration.tables import authors_table, articles_table, article_author_table, topics_table, topic_article_table, categories_table, topic_category_table, mentions_table
 from Setup_worker import Setup_worker
 from Context_handler import Context_handler
 
@@ -14,16 +14,25 @@ class Setup_handler():
         self.db_len = None
         self.topics_description = None
         self.categories_dict = None
+        self.topic_summaries = None
 
     def Start_handler_values(self,n_topics=15,n=None):
-        url_list = self.publications_df.Link.to_list() if n is None else self.publications_df.Link.to_list()[:n]
-        self.db_len = len(url_list)
-        self.web_dict = self.worker.Get_all_data(url_list)
+        self.db_len = n if n is not None else self.publications_df.shape[0]
+        start = 0
+        df_section = self.publications_df[start:start+self.db_len]
+        self.web_dict,self.publications_df, = self.worker.Get_all_data(df_section)
         self.Configure_trending_topics(n_topics)
         
     def Configure_trending_topics(self,n_topics):
         abstracts_dict = self.web_dict["abstracts"]
-        self.topic_freq, self.related_articles = self.ctx_handler.Get_trending_topics(abstracts_dict,n_topics)
+        publish_dict = self.web_dict["publish_date"]
+
+        self.topic_freq, self.related_articles, self.topics_dates = self.ctx_handler.Get_trending_topics(abstracts_dict,publish_dict,n_topics)
+
+
+
+
+
 
 
     async def Fill_database(self):
@@ -34,11 +43,35 @@ class Setup_handler():
         await self.Fill_topic_article_table()
         await self.Fill_categories_table(6,self.topics_description)
         await self.Fill_topic_category_table(self.categories_dict)
+        await self.Fill_mentions_table()
+
+    async def Clear_databases(self):
+        await self.database.connect()
+        await authors_table.clear_table()
+        await articles_table.clear_table()
+        await article_author_table.clear_table()
+        await topics_table.clear_table()
+        await topic_article_table.clear_table()
+        await categories_table.clear_table()
+        await topic_category_table.clear_table()
+        await mentions_table.clear_table()
+        await self.database.disconnect()
 
 
 
 
-
+    async def Fill_mentions_table(self):
+        await self.database.connect()
+        for key in self.topics_dates:
+            topic_id = await topics_table.Get_id_by_name(key)
+            for date,count in self.topics_dates[key].items():
+                mention_row = mentions_table.Create_mention(
+                    topic_id=topic_id,
+                    mention_date=date,
+                    mention_counter=count
+                )
+                await mentions_table.Insert_mention(mention_row)
+        await self.database.disconnect()
 
 
 
@@ -51,10 +84,6 @@ class Setup_handler():
             category_id = await categories_table.Get_id_by_name(category["category_name"])
             for topic in category["topics"]:
                 topic_id = await topics_table.Get_id_by_name(topic)
-                print("--------")
-                print(topic)
-                print(topic_id)
-                print(category_id)
                 topic_category_row = topic_category_table.Create_topic_category_row(
                     topic_id=topic_id,
                     category_id=category_id
@@ -85,10 +114,6 @@ class Setup_handler():
             topic_id = await topics_table.Get_id_by_name(topic)
             for article_index in self.related_articles[topic]:
                 article_id = await articles_table.Get_id_by_link(self.publications_df.Link[article_index])
-                print("-------")
-                print(topic)
-                print(topic_id)
-                print(article_id)
                 topic_article_row = topic_article_table.Create_topic_article_row(
                     topic_id=topic_id,
                     article_id=article_id
@@ -149,14 +174,14 @@ class Setup_handler():
 
     async def Fill_topics_table(self):
         topics_articles_dict = self.worker.Format_topics_articles_dict(self.related_articles,self.publications_df.Title.to_list())
-        summaries = self.ctx_handler.Generate_summary_based_on_topics(topics_articles_dict)
-        self.topics_description = summaries
+        self.topic_summaries = self.ctx_handler.Generate_summary_based_on_topics(topics_articles_dict)
+        self.topics_description = self.topic_summaries
         await self.database.connect()
 
-        for topic in summaries.keys():
+        for topic in self.topic_summaries.keys():
             topic_row = topics_table.Create_topic(
                 name=topic,
-                summary=summaries[topic]
+                summary=self.topic_summaries[topic]
             )
             await topics_table.Insert_topic(topic_row)
 

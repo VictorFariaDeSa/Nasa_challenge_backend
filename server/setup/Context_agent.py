@@ -18,12 +18,43 @@ class ContextAgent:
             "You are a market intelligence expert and trend analyst in science and technology. "
         )
 
+
+    def Generate_single_topic_summary(self,topic_name,articles_title):
+            task_description = (
+            "Analyze a topic name and the article titles for this topic, "
+            "and write a small descriptive summary for the topic. "
+            "Return only the summary with no extra texts. "
+        )
+
+            prompt = ChatPromptTemplate.from_messages([
+                SystemMessage(content=self.context_prompt),
+                SystemMessage(content=task_description),
+                ("human", "Generate topic description considering this topic name: {topic_name} and this articles list: {articles_list}")
+            ])
+
+            chain = prompt | self.llm | StrOutputParser()
+
+            # Executa a chain
+            summary = chain.invoke({"topic_name": topic_name, "articles_list":articles_title})
+
+            return summary
+
+    def Generate_topics_summary_individual(self, topics_articles_dict):
+        new_dict = {}
+        for topic in topics_articles_dict.keys():
+            summary = self.Generate_single_topic_summary(topic,topics_articles_dict[topic])
+            new_dict[topic] = summary
+        return new_dict
+
+
     def Generate_topics_summary(self, topics_articles_dict):
         task_description = (
             "Analyze the dictionary of topic names and the article titles for each topic, "
             "and write a small descriptive summary for each topic. "
             "Return a single JSON object with topic names as keys and summaries as values. "
-            "Do not create new topics; include all passed topics."
+            "Do not create new topics; include all passed topics." \
+            "Your output must no contain nothing besides the simple json"
+            "Do not let any topic without a description"
         )
 
         prompt = ChatPromptTemplate.from_messages([
