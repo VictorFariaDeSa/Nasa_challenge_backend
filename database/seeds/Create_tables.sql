@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS categories (
 
 CREATE TABLE IF NOT EXISTS articles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL, 
+    name VARCHAR(250) NOT NULL, 
     summary TEXT,
-    link VARCHAR(100),
+    link VARCHAR(250),
     publish_date DATE
 );
 

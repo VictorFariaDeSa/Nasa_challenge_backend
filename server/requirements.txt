@@ -1,8 +1,31 @@
+# Agentes e Gemini
+langchain-google-genai
+langchain-community
+tavily-python
+
+# Web Framework e Servidor
 fastapi
 uvicorn[standard]
 
-sqlalchemy 
+# Banco de Dados
+sqlalchemy
 asyncpg
 databases[postgresql]
+
+# Utilidades
 python-dotenv
 pydantic
+
+# Data Science e ML
+pandas
+scikit-learn
+gensim
+numpy==1.24.4
+
+chromadb
+sentence-transformers
+pdfplumber
+
+beautifulsoup4 
+lxml
+nltk
