@@ -14,4 +14,6 @@ class TrendingOrbit_table():
         results = await self.database.fetch_all(query)
         return [dict(result) for result in results]
 
-        
+    async def clear_table(self):
+        query = self.table.delete()
+        await self.database.execute(query)

@@ -7,7 +7,7 @@ metadata = MetaData()
 class MentionRow(BaseModel):
     topic_id: int
     mention_date: date
-    mention_value: int | None = None
+    mention_counter: int | None = None
 
 mentions = Table(
     "mentions",
@@ -23,18 +23,18 @@ class TO_mentions_table(TrendingOrbit_table):
     def __init__(self):
         super().__init__(table=mentions,row=MentionRow,metadata=metadata)
 
-    def Create_mention(self,topic_id:int, mention_date: date, mention_value:int):
+    def Create_mention(self,topic_id:int, mention_date: date, mention_counter:int):
         return self.row(
             topic_id = topic_id,
             mention_date = mention_date,
-            mention_value = mention_value
+            mention_counter = mention_counter
             )
 
     async def Insert_mention(self,new_row: MentionRow):
         query = self.table.insert().values(
             topic_id=new_row.topic_id,
             mention_date=new_row.mention_date, 
-            mention_value=new_row.mention_value
+            mention_counter=new_row.mention_counter
             )
         last_record_id = await self.database.execute(query)
         return {"id": last_record_id}
