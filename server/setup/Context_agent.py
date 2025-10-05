@@ -18,8 +18,6 @@ class ContextAgent:
             "You are a market intelligence expert and trend analyst in science and technology. "
         )
 
-
-
     def Generate_topics_summary(self, topics_articles_dict):
         task_description = (
             "Analyze the dictionary of topic names and the article titles for each topic, "
@@ -62,20 +60,49 @@ class ContextAgent:
 
 
 
-    def Generate_topic_summary(self,topic_name,articles_list):
-        task_description = ("""
-        Your task is to analyze a topic name for a give subject and the titles from the articles that presents this topic
-        and write a small descriptive summary to site visitors to understand what that topic is about
-        """)
+
+    def Generate_categories(self, number_of_categories, topics_dict: dict):
+        task_description = (
+            "Analyze the dictionary of topic names and their summaries, and create categories to group these topics. "
+            "One topic can belong to more than one category if necessary, and one category usually has multiple topics. "
+            "You should also write a short, clear description for each category you create. "
+            "The user will specify how many categories they want. "
+            "Your output must be valid JSON following this structure:\n\n"
+            "{\n"
+            "  '1': {\n"
+            "     'category_name': '...',\n"
+            "     'category_description': '...',\n"
+            "     'topics': ['topic1', 'topic2', ...]\n"
+            "  },\n"
+            "  '2': {...}\n"
+            "}\n\n"
+            "Remember: you are only creating categories — the topic names and summaries must not be modified."
+        )
+
         prompt = ChatPromptTemplate.from_messages([
             SystemMessage(content=self.context_prompt),
-            task_description,
-            ("human", "Generate topic description considering this: {data_input}")
+            SystemMessage(content=task_description),
+            ("human", "Generate {number_of_categories} categories considering this: {data_input}")
         ])
-        chain = prompt | self.llm | StrOutputParser()
-        data_input = (f"""
-        Topic: {topic_name}
-        Articles list: {articles_list}
-        """)
-        result = chain.invoke({"data_input": data_input})
-        return result
+
+        chain = prompt | self.llm
+        raw_output = chain.invoke({"data_input": topics_dict,
+                                    "number_of_categories":number_of_categories})
+
+        if hasattr(raw_output, "content"):
+            raw_output = raw_output.content
+
+        raw_output = raw_output.strip()
+        if raw_output.startswith("```json"):
+            raw_output = raw_output[len("```json"):].strip()
+        if raw_output.endswith("```"):
+            raw_output = raw_output[:-3].strip()
+
+        try:
+            json_text = raw_output.replace("'", '"')
+            categories = json.loads(json_text)
+        except json.JSONDecodeError as e:
+            categories = {}
+
+        return categories
+

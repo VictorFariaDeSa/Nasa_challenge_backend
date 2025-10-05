@@ -47,9 +47,7 @@ class Context_handler():
     
     #passar um dict com o nome dos topicos como chave e uma lista de titulos como valor
     def Generate_summary_based_on_topics(self,topics_articles_dict):
-        
-        # description_dict = {}
-        # for topic,articles_list in topics_articles_dict.items():
-        #     summary = self.llm_agent.Generate_topic_summary(topic,articles_list)
-        #     description_dict[topic] = summary
         return self.llm_agent.Generate_topics_summary(topics_articles_dict)
+
+    def Generate_categories_based_on_topics(self,number_of_categories,topics_description_dict):
+        return self.llm_agent.Generate_categories(number_of_categories,topics_description_dict)
