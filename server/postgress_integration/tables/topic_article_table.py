@@ -2,7 +2,7 @@ from sqlalchemy import Table, Column, Integer, MetaData, ForeignKey
 from pydantic import BaseModel
 from postgress_integration.TrendingOrbit_table import TrendingOrbit_table
 metadata = MetaData()
-
+from sqlalchemy.dialects.postgresql import insert
 
 class TopicArticleRow(BaseModel):
     article_id: int 
@@ -23,10 +23,10 @@ class TO_topic_article_table(TrendingOrbit_table):
         return self.row(article_id=article_id,topic_id=topic_id)
 
     async def Insert_topic_article(self,new_row: TopicArticleRow):
-        query = self.table.insert().values(
+        query = insert(self.table).values(
             article_id=new_row.article_id, 
             topic_id=new_row.topic_id
-            )
+            ).on_conflict_do_nothing(index_elements=['article_id', 'topic_id'])
         last_record_id = await self.database.execute(query)
         return {"id": last_record_id}
 

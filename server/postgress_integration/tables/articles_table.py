@@ -3,13 +3,13 @@ from pydantic import BaseModel
 from postgress_integration.TrendingOrbit_table import TrendingOrbit_table
 from datetime import date
 metadata = MetaData()
-
+from typing import Optional
 
 class ArticleRow(BaseModel):
     name: str
     summary: str | None = None
     link: str
-    publish_date: date
+    publish_date: Optional[date] = None 
 
 articles = Table(
     "articles",
@@ -18,7 +18,7 @@ articles = Table(
     Column("name", String(50), nullable=False),
     Column("summary", Text),
     Column("link", String(100)),
-    Column("publish_date", Date),
+    Column("publish_date", Date, nullable=True),
 
 )
 
